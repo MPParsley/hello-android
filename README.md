@@ -67,13 +67,38 @@ The GitHub Actions workflow (`.github/workflows/build.yml`) builds both platform
 |---|---|---|
 | `android-apk` | Debug and release `.apk` files | Install on a device/emulator with `adb install <file>.apk` |
 | `ios-app` | iOS simulator `.app` bundle | Drag into an open Simulator window, or install with `xcrun simctl install booted iosApp.app` |
+| `ios-device-ipa` | Signed `.ipa` for real devices | Install via Apple Configurator, `ios-deploy`, or Finder drag-and-drop (requires signing secrets — see below) |
 | `ios-frameworks` | Shared Kotlin/Native `.framework` binaries (all iOS architectures) | Build dependency only — used by Xcode when compiling the iOS app, not directly installable |
 
 To download: go to **Actions** > select a workflow run > scroll to the **Artifacts** section at the bottom of the page.
 
+### Setting up iOS device builds in CI
+
+The `ios-device-ipa` artifact is only produced when iOS signing is configured. This requires an [Apple Developer Program](https://developer.apple.com/programs/) membership ($99/year).
+
+**1. Create the required GitHub secrets** (Settings > Secrets and variables > Actions > Secrets):
+
+| Secret | How to get it |
+|---|---|
+| `IOS_CERTIFICATE_BASE64` | Export your distribution certificate as a `.p12` from Keychain Access, then run `base64 -i certificate.p12` |
+| `IOS_CERTIFICATE_PASSWORD` | The password you set when exporting the `.p12` |
+| `IOS_PROVISIONING_PROFILE_BASE64` | Download an Ad Hoc provisioning profile from the Apple Developer portal, then run `base64 -i profile.mobileprovision` |
+| `IOS_TEAM_ID` | Your 10-character Team ID (visible at [developer.apple.com/account](https://developer.apple.com/account) > Membership Details) |
+
+**2. Create the required GitHub variable** (Settings > Secrets and variables > Actions > Variables):
+
+| Variable | Value |
+|---|---|
+| `IOS_SIGNING_ENABLED` | `true` |
+| `IOS_BUNDLE_ID` | *(optional)* Override the bundle ID — defaults to `com.example.hellomultiplatform.ios` |
+
+**3. Register your test devices** in the Apple Developer portal under Devices, and include their UDIDs in the provisioning profile.
+
+Once configured, every push to `main` or `claude/**` branches will produce a signed IPA you can install directly on registered devices.
+
 ## Running on a Physical iOS Device
 
-The CI artifacts are simulator-only builds. To run on a real iPhone or iPad:
+If CI signing is not configured (see above), you can build locally. To run on a real iPhone or iPad:
 
 1. Open `iosApp/iosApp.xcodeproj` in Xcode
 2. Connect your device via USB (or set up wireless debugging)
