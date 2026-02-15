@@ -264,5 +264,5 @@
 		};
 /* End XCConfigurationList section */
 	};
-	rootObjectID = 2A3C6D2A2B000001000000C;
+	rootObject = 2A3C6D2A2B000001000000C;
 }
