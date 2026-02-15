@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    id("org.jetbrains.kotlin.android") version libs.versions.kotlin.get()
+    alias(libs.plugins.kotlinAndroid)
 }
 
 android {
