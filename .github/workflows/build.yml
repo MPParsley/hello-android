@@ -91,11 +91,27 @@ jobs:
       - name: Find iOS Simulator destination
         id: simulator
         run: |
-          DEST=$(xcodebuild -scheme iosApp -project iosApp/iosApp.xcodeproj -showdestinations 2>/dev/null \
-            | grep 'platform:iOS Simulator' \
-            | head -1 \
-            | sed 's/.*{ //' | sed 's/ }$//')
-          echo "destination=$DEST" >> "$GITHUB_OUTPUT"
+          # Get the latest available iPhone simulator runtime and device
+          RUNTIME=$(xcrun simctl list runtimes iOS available -j | python3 -c "
+          import json, sys
+          runtimes = json.load(sys.stdin)['runtimes']
+          if runtimes:
+              print(runtimes[-1]['identifier'])
+          ")
+          DEVICE_ID=$(xcrun simctl list devices iPhone available -j | python3 -c "
+          import json, sys
+          devices = json.load(sys.stdin)['devices']
+          for runtime in sorted(devices.keys(), reverse=True):
+              if devices[runtime]:
+                  print(devices[runtime][0]['udid'])
+                  break
+          ")
+          if [ -n "$DEVICE_ID" ]; then
+            echo "destination=platform=iOS Simulator,id=$DEVICE_ID" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::No iOS Simulator device found"
+            exit 1
+          fi
 
       - name: Build iOS App (Simulator)
         run: |
