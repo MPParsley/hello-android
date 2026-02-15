@@ -88,6 +88,15 @@ jobs:
       - name: Build shared framework for iOS Simulator
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
+      - name: Find iOS Simulator destination
+        id: simulator
+        run: |
+          DEST=$(xcodebuild -scheme iosApp -project iosApp/iosApp.xcodeproj -showdestinations 2>/dev/null \
+            | grep 'platform:iOS Simulator' \
+            | head -1 \
+            | sed 's/.*{ //' | sed 's/ }$//')
+          echo "destination=$DEST" >> "$GITHUB_OUTPUT"
+
       - name: Build iOS App (Simulator)
         run: |
           cd iosApp
@@ -95,7 +104,7 @@ jobs:
             -project iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination '${{ steps.simulator.outputs.destination }}' \
             -derivedDataPath build \
             FRAMEWORK_SEARCH_PATHS="../shared/build/bin/iosSimulatorArm64/debugFramework" \
             CODE_SIGN_IDENTITY="" \
