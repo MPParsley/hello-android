@@ -71,6 +71,19 @@ The GitHub Actions workflow (`.github/workflows/build.yml`) builds both platform
 
 To download: go to **Actions** > select a workflow run > scroll to the **Artifacts** section at the bottom of the page.
 
+## Running on a Physical iOS Device
+
+The CI artifacts are simulator-only builds. To run on a real iPhone or iPad:
+
+1. Open `iosApp/iosApp.xcodeproj` in Xcode
+2. Connect your device via USB (or set up wireless debugging)
+3. Select your device from the destination dropdown
+4. Go to **Signing & Capabilities** and select a team — a free Apple ID works for personal testing
+5. Xcode may prompt you to trust the developer profile on your device: go to **Settings > General > VPN & Device Management** on the device and trust your profile
+6. Press **Run** (Cmd+R)
+
+> **Note:** A free Apple ID limits you to 3 app IDs per week and apps expire after 7 days. An [Apple Developer Program](https://developer.apple.com/programs/) membership ($99/year) removes these limits and is required for App Store or TestFlight distribution.
+
 ## Requirements
 
 - JDK 17
