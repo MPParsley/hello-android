@@ -1,0 +1,73 @@
+# Hello Multiplatform
+
+A Kotlin Multiplatform project targeting Android and iOS, using Compose Multiplatform for shared UI.
+
+## Project Structure
+
+```
+├── shared/          Kotlin Multiplatform shared module (common UI and logic)
+├── androidApp/      Android application
+└── iosApp/          iOS application (Xcode project)
+```
+
+## Building
+
+### Android
+
+```bash
+# Debug APK
+./gradlew :androidApp:assembleDebug
+
+# Release APK
+./gradlew :androidApp:assembleRelease
+```
+
+**Output locations:**
+- Debug: `androidApp/build/outputs/apk/debug/androidApp-debug.apk`
+- Release: `androidApp/build/outputs/apk/release/androidApp-release-unsigned.apk`
+
+### iOS
+
+Build the shared framework first, then build the app with Xcode:
+
+```bash
+# Build shared framework for iOS Simulator (arm64)
+./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+
+# Build shared framework for device
+./gradlew :shared:linkReleaseFrameworkIosArm64
+```
+
+Then open `iosApp/iosApp.xcodeproj` in Xcode and build, or use the command line:
+
+```bash
+cd iosApp
+xcodebuild build \
+  -project iosApp.xcodeproj \
+  -scheme iosApp \
+  -configuration Debug \
+  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+  -derivedDataPath build
+```
+
+**Output locations:**
+- Simulator app: `iosApp/build/Build/Products/Debug-iphonesimulator/iosApp.app`
+- Shared frameworks: `shared/build/bin/ios*/releaseFramework/`
+
+## CI Artifacts
+
+The GitHub Actions workflow (`.github/workflows/build.yml`) builds both platforms on every push to `main` and on pull requests. Build artifacts are uploaded and can be downloaded from the workflow run's **Artifacts** section in GitHub:
+
+| Artifact | Contents |
+|---|---|
+| `android-apk` | Debug and release APKs |
+| `ios-frameworks` | Shared framework binaries for all iOS architectures |
+| `ios-app` | iOS simulator `.app` bundle |
+
+To download: go to **Actions** > select a workflow run > scroll to the **Artifacts** section at the bottom of the page.
+
+## Requirements
+
+- JDK 17
+- Android SDK (compileSdk 34, minSdk 24)
+- Xcode 15+ (for iOS builds)
