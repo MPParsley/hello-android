@@ -63,11 +63,11 @@ xcodebuild build \
 
 The GitHub Actions workflow (`.github/workflows/build.yml`) builds both platforms on every push to `main` and on pull requests. Build artifacts are uploaded and can be downloaded from the workflow run's **Artifacts** section in GitHub:
 
-| Artifact | Contents |
-|---|---|
-| `android-apk` | Debug and release APKs |
-| `ios-frameworks` | Shared framework binaries for all iOS architectures |
-| `ios-app` | iOS simulator `.app` bundle |
+| Artifact | Contents | How to use |
+|---|---|---|
+| `android-apk` | Debug and release `.apk` files | Install on a device/emulator with `adb install <file>.apk` |
+| `ios-app` | iOS simulator `.app` bundle | Drag into an open Simulator window, or install with `xcrun simctl install booted iosApp.app` |
+| `ios-frameworks` | Shared Kotlin/Native `.framework` binaries (all iOS architectures) | Build dependency only — used by Xcode when compiling the iOS app, not directly installable |
 
 To download: go to **Actions** > select a workflow run > scroll to the **Artifacts** section at the bottom of the page.
 

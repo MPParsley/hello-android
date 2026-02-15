@@ -127,8 +127,20 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Find iOS App bundle
+        id: app-path
+        run: |
+          APP=$(find iosApp/build/Build/Products -name '*.app' -type d | head -1)
+          if [ -z "$APP" ]; then
+            echo "::error::No .app bundle found in build products"
+            find iosApp/build -type d -maxdepth 5 || true
+            exit 1
+          fi
+          echo "Found app at: $APP"
+          echo "path=$APP" >> "$GITHUB_OUTPUT"
+
       - name: Upload iOS App
         uses: actions/upload-artifact@v4
         with:
           name: ios-app
-          path: iosApp/build/Build/Products/Debug-iphonesimulator/*.app
+          path: ${{ steps.app-path.outputs.path }}
