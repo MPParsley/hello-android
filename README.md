@@ -42,11 +42,16 @@ Then open `iosApp/iosApp.xcodeproj` in Xcode and build, or use the command line:
 
 ```bash
 cd iosApp
+
+# List available simulators to find a valid destination:
+xcodebuild -scheme iosApp -showdestinations
+
+# Then build with a matching destination, e.g.:
 xcodebuild build \
   -project iosApp.xcodeproj \
   -scheme iosApp \
   -configuration Debug \
-  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+  -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath build
 ```
 
