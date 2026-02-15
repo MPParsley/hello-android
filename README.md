@@ -67,12 +67,40 @@ The GitHub Actions workflow (`.github/workflows/build.yml`) builds both platform
 |---|---|---|
 | `android-apk` | Debug and release `.apk` files | Install on a device/emulator with `adb install <file>.apk` |
 | `ios-app` | iOS simulator `.app` bundle | Drag into an open Simulator window, or install with `xcrun simctl install booted iosApp.app` |
+| `ios-device-unsigned-ipa` | Unsigned `.ipa` built for device (arm64) | Re-sign locally with your free Apple ID to install on a real device (see below) |
 | `ios-device-ipa` | Signed `.ipa` for real devices | Install via Apple Configurator, `ios-deploy`, or Finder drag-and-drop (requires signing secrets — see below) |
 | `ios-frameworks` | Shared Kotlin/Native `.framework` binaries (all iOS architectures) | Build dependency only — used by Xcode when compiling the iOS app, not directly installable |
 
 To download: go to **Actions** > select a workflow run > scroll to the **Artifacts** section at the bottom of the page.
 
-### Setting up iOS device builds in CI
+### Installing the unsigned IPA on a real device
+
+The `ios-device-unsigned-ipa` artifact is always produced — no secrets needed. To install it on your device, re-sign it locally using a free Apple ID:
+
+1. Download the `ios-device-unsigned-ipa` artifact and unzip it to get `iosApp-unsigned.ipa`
+2. Re-sign and install using one of these options:
+
+**Option A — [AltStore](https://altstore.io/) / [SideStore](https://sidestore.io/)** (easiest, GUI-based):
+- Install AltStore on your Mac and iPhone
+- Open the `.ipa` file with AltStore — it re-signs with your Apple ID automatically
+
+**Option B — Xcode re-sign** (no extra tools):
+```bash
+# Unpack the IPA
+unzip iosApp-unsigned.ipa -d resigned
+# Open Xcode, create a blank iOS project with your team/Apple ID to generate signing assets, then:
+codesign --force --sign "Apple Development: your@email.com (XXXXXXXXXX)" \
+  --entitlements entitlements.plist \
+  resigned/Payload/iosApp.app
+# Repack
+cd resigned && zip -r ../iosApp-signed.ipa Payload
+# Install via Xcode Devices window, Apple Configurator, or:
+xcrun devicectl device install app --device <UDID> iosApp-signed.ipa
+```
+
+> **Note:** Free Apple ID signing limits apps to 7-day expiry and 3 app IDs per week.
+
+### Setting up iOS device builds in CI (signed)
 
 The `ios-device-ipa` artifact is only produced when iOS signing is configured. This requires an [Apple Developer Program](https://developer.apple.com/programs/) membership ($99/year).
 
